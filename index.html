@@ -23,22 +23,33 @@
 
     <!-- Initialize the chat widget -->
     <script>
+      // Initialize the chat widget with a slight delay to ensure proper loading
       window.addEventListener("load", () => {
-        if (typeof PureBlueChat !== "undefined") {
-          PureBlueChat.init({
-            personaSlug: "general-qa", // Using your general-qa persona from the public chat
-            prospectSlug: "default",
-            tenant: "mend",
-            chatDomain: "purebluechat.com",
-            position: "bottom-right",
-            primaryColor: "#1a5cff", // Matching your existing blue color
-            width: 400,
-            height: 600,
-            isPublic: true,
-          });
-        } else {
-          console.error("PureBlueChat widget not available");
-        }
+        // Short timeout to ensure widget script is fully loaded
+        setTimeout(() => {
+          if (typeof PureBlueChat !== "undefined") {
+            console.log("Initializing PureBlueChat widget");
+            PureBlueChat.init({
+              personaSlug: "general-qa",
+              prospectSlug: "default",
+              tenant: "mend",
+              chatDomain: "purebluechat.com",
+              position: "bottom-right",
+              primaryColor: "#1a5cff",
+              width: 400,
+              height: 600,
+              isPublic: true,
+              useDirectNavigation: true,
+            });
+
+            // Log device detection for debugging
+            if (PureBlueChat.isIOS()) {
+              console.log("iOS device detected, using direct navigation");
+            }
+          } else {
+            console.error("PureBlueChat widget not available");
+          }
+        }, 500); // 500ms delay
       });
     </script>
   </body>
