@@ -15,92 +15,29 @@
       defer
       src="https://mend.pureblue.info/assets/js/chatEmbedding.js"
     ></script>
-    <script type="module" crossorigin src="/mend/assets/index-Bn6P58ql.js"></script>
-    <link rel="stylesheet" crossorigin href="/mend/assets/index-Dgj8Bcn-.css">
+    <script type="module" crossorigin src="/mend/assets/index-BduBsdCF.js"></script>
+    <link rel="stylesheet" crossorigin href="/mend/assets/index-rfaUIKzz.css">
   </head>
   <body>
     <div id="root"></div>
 
 
-    <!-- Initialize the chat widget with iPad direct navigation -->
+    <!-- Initialize the chat widget -->
     <script>
       window.addEventListener("load", () => {
         setTimeout(() => {
-          // Check if the widget script loaded
           if (typeof PureBlueChat !== "undefined") {
-            // Detect iPad
-            const isIPad =
-              /iPad/.test(navigator.userAgent) ||
-              (navigator.platform === "MacIntel" &&
-                navigator.maxTouchPoints > 1);
-
-            if (isIPad) {
-              // For iPad: Create custom button that opens chat in new tab
-              const styleEl = document.createElement("style");
-              styleEl.innerHTML = `
-                .ipad-chat-button {
-                  position: fixed;
-                  bottom: 20px;
-                  right: 20px;
-                  width: 60px;
-                  height: 60px;
-                  border-radius: 50%;
-                  background-color: #1a5cff;
-                  color: white;
-                  display: flex;
-                  justify-content: center;
-                  align-items: center;
-                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                  z-index: 99999;
-                  cursor: pointer;
-                  -webkit-tap-highlight-color: transparent;
-                }
-                
-                .ipad-chat-button:active {
-                  transform: scale(0.95);
-                }
-              `;
-              document.head.appendChild(styleEl);
-
-              // Create button
-              const button = document.createElement("div");
-              button.className = "ipad-chat-button";
-              button.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                </svg>
-              `;
-
-              // Add click handler
-              button.addEventListener("click", function () {
-                const tenant = "mend";
-                const chatDomain = "purebluechat.com";
-                const hostname = `${tenant}-public.${chatDomain}`;
-                const path = "/public-chat";
-
-                // Build URL
-                const chatUrl = `https://${hostname}${path}?personaSlug=general-qa&prospectSlug=default&isMobile=1&isIPad=1`;
-
-                // Open in new tab
-                window.open(chatUrl, "mend_chat");
-              });
-
-              // Add to page
-              document.body.appendChild(button);
-            } else {
-              // For all other devices: Use normal widget
-              PureBlueChat.init({
-                personaSlug: "general-qa",
-                prospectSlug: "default",
-                tenant: "mend",
-                chatDomain: "purebluechat.com",
-                position: "bottom-right",
-                primaryColor: "#1a5cff",
-                width: 400,
-                height: 600,
-                isPublic: true,
-              });
-            }
+            PureBlueChat.init({
+              personaSlug: "general-qa",
+              prospectSlug: "default",
+              tenant: "mend",
+              chatDomain: "purebluechat.com",
+              position: "bottom-right",
+              primaryColor: "#1a5cff",
+              width: 400,
+              height: 600,
+              isPublic: true,
+            });
           } else {
             console.error("PureBlueChat widget not available");
           }
