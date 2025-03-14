@@ -10,47 +10,291 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mend.io</title>
 
+    <!-- On-screen debugging console for iPad -->
+    <script>
+      (function () {
+        // Create an on-screen console
+        const debugDiv = document.createElement("div");
+        debugDiv.style.cssText =
+          "position:fixed; top:10px; left:10px; right:10px; max-height:200px; overflow:auto; background:rgba(0,0,0,0.7); color:white; z-index:10000; padding:10px; font-family:monospace; font-size:12px; border-radius:5px;";
+
+        // Add a close button
+        const closeButton = document.createElement("div");
+        closeButton.textContent = "X";
+        closeButton.style.cssText =
+          "position:absolute; top:5px; right:8px; cursor:pointer; font-weight:bold;";
+        closeButton.addEventListener("click", function () {
+          debugDiv.style.display = "none";
+        });
+
+        // Add timestamp and clear button
+        const headerDiv = document.createElement("div");
+        headerDiv.style.cssText =
+          "display:flex; justify-content:space-between; margin-bottom:5px;";
+
+        const titleSpan = document.createElement("span");
+        titleSpan.textContent = "Debug Console";
+        titleSpan.style.fontWeight = "bold";
+
+        const clearButton = document.createElement("span");
+        clearButton.textContent = "Clear";
+        clearButton.style.cursor = "pointer";
+        clearButton.style.textDecoration = "underline";
+        clearButton.addEventListener("click", function () {
+          const logs = debugDiv.querySelectorAll(".log-entry");
+          logs.forEach((log) => log.remove());
+        });
+
+        headerDiv.appendChild(titleSpan);
+        headerDiv.appendChild(clearButton);
+
+        debugDiv.appendChild(closeButton);
+        debugDiv.appendChild(headerDiv);
+
+        // Add to document when DOM is ready
+        document.addEventListener("DOMContentLoaded", function () {
+          document.body.appendChild(debugDiv);
+        });
+
+        // Capture console messages
+        const originalConsole = {
+          log: console.log,
+          error: console.error,
+          warn: console.warn,
+        };
+
+        function addMessage(type, args) {
+          const msg = document.createElement("div");
+          msg.className = "log-entry";
+          const time = new Date().toTimeString().split(" ")[0];
+          msg.textContent = `[${time}][${type}] ${Array.from(args).join(" ")}`;
+
+          if (type === "error") msg.style.color = "#ff7777";
+          if (type === "warn") msg.style.color = "#ffff77";
+
+          debugDiv.appendChild(msg);
+          // Auto-scroll to bottom
+          debugDiv.scrollTop = debugDiv.scrollHeight;
+        }
+
+        // Override console methods
+        console.log = function () {
+          originalConsole.log.apply(console, arguments);
+          addMessage("log", arguments);
+        };
+
+        console.error = function () {
+          originalConsole.error.apply(console, arguments);
+          addMessage("error", arguments);
+        };
+
+        console.warn = function () {
+          originalConsole.warn.apply(console, arguments);
+          addMessage("warn", arguments);
+        };
+
+        // Capture global errors
+        window.addEventListener("error", function (e) {
+          addMessage("error", [
+            `ERROR: ${e.message} at ${e.filename}:${e.lineno}`,
+          ]);
+        });
+      })();
+    </script>
+
     <!-- Add the chat widget script -->
     <script
       defer
       src="https://mend.pureblue.info/assets/js/chatEmbedding.js"
     ></script>
-    <script type="module" crossorigin src="/mend/assets/index-BduBsdCF.js"></script>
-    <link rel="stylesheet" crossorigin href="/mend/assets/index-rfaUIKzz.css">
+    <script type="module" crossorigin src="/mend/assets/index-DIlAsyUZ.js"></script>
+    <link rel="stylesheet" crossorigin href="/mend/assets/index-BjNrCvtj.css">
   </head>
   <body>
     <div id="root"></div>
 
 
+    <!-- Simple iframe test for debugging purposes -->
+    <div
+      id="iframe-test-container"
+      style="
+        display: none;
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 300px;
+        height: 200px;
+        background: white;
+        border: 1px solid #ccc;
+        z-index: 9999;
+      "
+    >
+      <div
+        style="
+          padding: 8px;
+          border-bottom: 1px solid #eee;
+          display: flex;
+          justify-content: space-between;
+        "
+      >
+        <span>Test iframe</span>
+        <span
+          style="cursor: pointer"
+          onclick="document.getElementById('iframe-test-container').style.display='none'"
+          >X</span
+        >
+      </div>
+      <div id="test-iframe-content" style="height: calc(100% - 30px)"></div>
+    </div>
+
+    <!-- Helper functions for testing -->
+    <script>
+      // Test simple iframe to see if basic iframes work
+      function testSimpleIframe() {
+        console.log("Testing simple iframe");
+        const container = document.getElementById("test-iframe-content");
+        container.innerHTML = "";
+
+        const iframe = document.createElement("iframe");
+        iframe.src = "https://example.com";
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
+
+        container.appendChild(iframe);
+        document.getElementById("iframe-test-container").style.display =
+          "block";
+
+        console.log("Simple iframe created - check if it loads");
+      }
+
+      // Add device info to debug
+      function logDeviceInfo() {
+        console.log("--------- DEVICE INFO ---------");
+        console.log("User Agent:", navigator.userAgent);
+        console.log("Platform:", navigator.platform);
+        console.log("Vendor:", navigator.vendor);
+        console.log("Screen:", screen.width + "x" + screen.height);
+        console.log("Window:", window.innerWidth + "x" + window.innerHeight);
+        console.log("Pixel Ratio:", window.devicePixelRatio);
+        console.log("Touch Points:", navigator.maxTouchPoints || 0);
+
+        // iOS detection
+        const iOS =
+          /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const iPad =
+          /iPad/.test(navigator.userAgent) ||
+          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+        console.log("iOS Device:", iOS);
+        console.log("iPad Device:", iPad);
+      }
+
+      // Show/hide debug panel
+      function toggleDebug() {
+        const debugDiv = document.querySelector(
+          'div[style*="position:fixed"][style*="z-index:10000"]'
+        );
+        if (debugDiv) {
+          debugDiv.style.display =
+            debugDiv.style.display === "none" ? "block" : "none";
+        }
+      }
+
+      // Add global functions for easy access
+      window.testSimpleIframe = testSimpleIframe;
+      window.logDeviceInfo = logDeviceInfo;
+      window.toggleDebug = toggleDebug;
+    </script>
+
     <!-- Initialize the chat widget -->
     <script>
       // Initialize the chat widget with a slight delay to ensure proper loading
       window.addEventListener("load", () => {
+        // First log device information
+        logDeviceInfo();
+
+        console.log("Page loaded, waiting for chat widget script...");
+
         // Short timeout to ensure widget script is fully loaded
         setTimeout(() => {
-          if (typeof PureBlueChat !== "undefined") {
-            console.log("Initializing PureBlueChat widget");
-            PureBlueChat.init({
-              personaSlug: "general-qa",
-              prospectSlug: "default",
-              tenant: "mend",
-              chatDomain: "purebluechat.com",
-              position: "bottom-right",
-              primaryColor: "#1a5cff",
-              width: 400,
-              height: 600,
-              isPublic: true,
-              useDirectNavigation: true,
-            });
+          console.log("Checking for PureBlueChat availability");
 
-            // Log device detection for debugging
-            if (PureBlueChat.isIOS()) {
-              console.log("iOS device detected, using direct navigation");
+          if (typeof PureBlueChat !== "undefined") {
+            console.log("PureBlueChat is defined, initializing widget");
+
+            try {
+              // Try to detect iOS
+              const isIOS =
+                /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+                !window.MSStream;
+              const isIPad =
+                /iPad/.test(navigator.userAgent) ||
+                (navigator.platform === "MacIntel" &&
+                  navigator.maxTouchPoints > 1);
+
+              console.log("Custom iOS detection:", { isIOS, isIPad });
+
+              // Initialize widget with debugging
+              PureBlueChat.init({
+                personaSlug: "general-qa",
+                prospectSlug: "default",
+                tenant: "mend",
+                chatDomain: "purebluechat.com",
+                position: "bottom-right",
+                primaryColor: "#1a5cff",
+                width: 400,
+                height: 600,
+                isPublic: true,
+                useDirectNavigation: true,
+              });
+
+              console.log("PureBlueChat initialized successfully");
+
+              // Check the widget's iOS detection
+              if (typeof PureBlueChat.isIOS === "function") {
+                console.log("Widget iOS detection:", PureBlueChat.isIOS());
+              } else {
+                console.warn("Widget doesn't have isIOS method");
+              }
+
+              // Add a test button after widget is active
+              setTimeout(() => {
+                const testButton = document.createElement("button");
+                testButton.innerText = "Test Simple iframe";
+                testButton.style.cssText =
+                  "position:fixed; top:220px; left:10px; padding:8px; z-index:10001; background:#eee;";
+                testButton.onclick = testSimpleIframe;
+                document.body.appendChild(testButton);
+
+                const toggleButton = document.createElement("button");
+                toggleButton.innerText = "Toggle Debug";
+                toggleButton.style.cssText =
+                  "position:fixed; top:220px; left:130px; padding:8px; z-index:10001; background:#eee;";
+                toggleButton.onclick = toggleDebug;
+                document.body.appendChild(toggleButton);
+              }, 2000);
+            } catch (e) {
+              console.error("Error initializing PureBlueChat:", e.message);
+              console.error("Error stack:", e.stack);
             }
           } else {
-            console.error("PureBlueChat widget not available");
+            console.error("PureBlueChat widget not available after waiting");
+
+            // Try to check if the script loaded
+            const scriptElement = document.querySelector(
+              'script[src*="chatEmbedding.js"]'
+            );
+            if (scriptElement) {
+              console.log(
+                "Script tag exists, readyState:",
+                scriptElement.readyState
+              );
+            } else {
+              console.error("Script tag not found in DOM");
+            }
           }
-        }, 500); // 500ms delay
+        }, 1000); // Increased to 1000ms for better reliability
       });
     </script>
   </body>
