@@ -10,99 +10,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mend.io</title>
 
-    <!-- On-screen debugging console for iPad - Keep this -->
-    <script>
-      // Your existing debug console code here
-    </script>
-
-    <!-- Remove the original chat widget script since it's not loading properly -->
-    <!-- <script defer src="https://mend.pureblue.info/assets/js/chatEmbedding.js"></script> -->
+    <!-- Add the chat widget script -->
+    <script
+      defer
+      src="https://mend.pureblue.info/assets/js/chatEmbedding.js"
+    ></script>
   </head>
   <body>
     <div id="root"></div>
 
     <script type="module" src="/src/main.jsx"></script>
 
-    <!-- Custom iPad-compatible chat solution -->
+    <!-- Initialize the chat widget with iPad direct navigation -->
     <script>
       window.addEventListener("load", () => {
-        console.log("Page loaded, implementing custom chat solution");
+        setTimeout(() => {
+          // Check if the widget script loaded
+          if (typeof PureBlueChat !== "undefined") {
+            // Detect iPad
+            const isIPad =
+              /iPad/.test(navigator.userAgent) ||
+              (navigator.platform === "MacIntel" &&
+                navigator.maxTouchPoints > 1);
 
-        // Detect iPad
-        const isIPad =
-          /iPad/.test(navigator.userAgent) ||
-          (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+            if (isIPad) {
+              // For iPad: Create custom button that opens chat in new tab
+              const styleEl = document.createElement("style");
+              styleEl.innerHTML = `
+                .ipad-chat-button {
+                  position: fixed;
+                  bottom: 20px;
+                  right: 20px;
+                  width: 60px;
+                  height: 60px;
+                  border-radius: 50%;
+                  background-color: #1a5cff;
+                  color: white;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                  z-index: 99999;
+                  cursor: pointer;
+                  -webkit-tap-highlight-color: transparent;
+                }
+                
+                .ipad-chat-button:active {
+                  transform: scale(0.95);
+                }
+              `;
+              document.head.appendChild(styleEl);
 
-        console.log("Device detection:", { isIPad });
+              // Create button
+              const button = document.createElement("div");
+              button.className = "ipad-chat-button";
+              button.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+              `;
 
-        // Create custom chat implementation that doesn't require the widget script
-        createCustomChatButton();
+              // Add click handler
+              button.addEventListener("click", function () {
+                const tenant = "mend";
+                const chatDomain = "purebluechat.com";
+                const hostname = `${tenant}-public.${chatDomain}`;
+                const path = "/public-chat";
 
-        function createCustomChatButton() {
-          // Add styles
-          const style = document.createElement("style");
-          style.textContent = `
-            .custom-chat-button {
-              position: fixed;
-              bottom: 20px;
-              right: 20px;
-              width: 60px;
-              height: 60px;
-              border-radius: 50%;
-              background-color: #1a5cff;
-              color: white;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-              z-index: 99999;
-              cursor: pointer;
-              -webkit-tap-highlight-color: transparent;
+                // Build URL
+                const chatUrl = `https://${hostname}${path}?personaSlug=general-qa&prospectSlug=default&isMobile=1&isIPad=1`;
+
+                // Open in new tab
+                window.open(chatUrl, "mend_chat");
+              });
+
+              // Add to page
+              document.body.appendChild(button);
+            } else {
+              // For all other devices: Use normal widget
+              PureBlueChat.init({
+                personaSlug: "general-qa",
+                prospectSlug: "default",
+                tenant: "mend",
+                chatDomain: "purebluechat.com",
+                position: "bottom-right",
+                primaryColor: "#1a5cff",
+                width: 400,
+                height: 600,
+                isPublic: true,
+              });
             }
-            
-            .custom-chat-button:active {
-              transform: scale(0.95);
-            }
-          `;
-          document.head.appendChild(style);
-
-          // Create the button
-          const button = document.createElement("div");
-          button.className = "custom-chat-button";
-          button.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-          `;
-
-          // Add click handler to open chat in new window
-          button.addEventListener("click", function () {
-            // Build the direct URL
-            const tenant = "mend";
-            const chatDomain = "purebluechat.com";
-            const hostname = `${tenant}-public.${chatDomain}`;
-            const path = "/public-chat";
-            const baseUrl = `https://${hostname}${path}`;
-
-            // Query parameters
-            const queryParams = new URLSearchParams({
-              personaSlug: "general-qa",
-              prospectSlug: "default",
-              isMobile: isIPad ? "1" : "0",
-              isIPad: isIPad ? "1" : "0",
-            });
-
-            const chatUrl = `${baseUrl}?${queryParams.toString()}`;
-            console.log("Opening chat URL:", chatUrl);
-
-            // Open in new window
-            window.open(chatUrl, "mend_chat");
-          });
-
-          // Add to document
-          document.body.appendChild(button);
-          console.log("Custom chat button created");
-        }
+          } else {
+            console.error("PureBlueChat widget not available");
+          }
+        }, 1000);
       });
     </script>
   </body>
